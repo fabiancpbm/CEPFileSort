@@ -1,5 +1,6 @@
 import struct
 import os
+import shutil
 import random
 
 # Essa variável será usada para nomear os arquivos e identificar a ordem de criação do grupo de arquivos.
@@ -11,8 +12,6 @@ fileQuantity = 8
 
 lineStruct = struct.Struct("72s72s72s72s2s8s2s")
 cepColumn = 5
-
-sizePerFile = lineStruct.size * 10
 
 # Criando 10 arquivos separados dentro da pasta de buuffet para realizar a intercalação entre eles.
 directoryName = "cep_file_buffer/"
@@ -64,6 +63,7 @@ def intercalate(fileA, fileB, newFile):
         contentB = fileB.read(lineStruct.size)
 
 # Intercalando de dois em dois arquivos até que reste apenas um arquivo ordenado.
+newFileName = ""
 while fileQuantity > 1:
     randomOrder = random.sample(range(fileQuantity), fileQuantity)
     iterations = fileQuantity
@@ -92,3 +92,5 @@ while fileQuantity > 1:
         os.remove(directoryName + fileNameA)
         os.remove(directoryName + fileNameB)
     groupCreationOrder = newGroupCreationOrder
+os.rename(directoryName + newFileName, "organized_cep_80.dat")
+shutil.rmtree(directoryName)
