@@ -1,0 +1,2 @@
+1: Execute o arquivo Create80CepFile.py para gerar o arquivo e CEP com 80 linhas.
+2: Execute o arquivo IntercalateFile.py para ordenar por intercalação o arquivo de CEP de 80 linhas criado.
