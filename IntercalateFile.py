@@ -7,10 +7,15 @@ import random
 # Assim, não haverá arquivos com o mesmo nome.
 groupCreationOrder = 0
 
-# Variável que guarda a quantidade de arquivos gerados para a próxima intercalação.
-fileQuantity = 8
-
+# Estrutura do arquivo.
 lineStruct = struct.Struct("72s72s72s72s2s8s2s")
+
+# Tamanhos do arquivo.
+fileSize = os.path.getsize("unorganized_cep_80.dat")
+registerQtd = fileSize // lineStruct.size
+registerPerFile = 10
+fileQuantity = registerQtd // registerPerFile
+
 cepColumn = 5
 
 # Criando 10 arquivos separados dentro da pasta de buuffet para realizar a intercalação entre eles.
@@ -19,46 +24,46 @@ directoryName = "cep_file_buffer/"
 if not os.path.exists(directoryName):
     os.mkdir(directoryName)
 
-fin = open("unorganized_cep_80.dat", "r", encoding='latin-1')
-for i in range(0, 8):
+fin = open("unorganized_cep_80.dat", "rb")
+for i in range(0, fileQuantity):
     ceps = []
-    for y in range(0, 10):
+    for y in range(0, registerPerFile):
         c = fin.read(lineStruct.size)
-        ceps.append(lineStruct.unpack(bytes(c, encoding="latin-1")))
+        ceps.append(lineStruct.unpack(bytes(c)))
     ceps.sort(key=lambda x:x[cepColumn])
 
     newFileName = directoryName + str(groupCreationOrder) + "_cep_" + str(i) + ".dat"
-    newFile = open(newFileName, "w+", encoding='latin-1')
+    newFile = open(newFileName, "wb+")
     for cep in ceps:
         line = lineStruct.pack(cep[0], cep[1], cep[2], cep[3], cep[4], cep[5], cep[6])
-        newFile.write(line.decode('latin-1'))
+        newFile.write(line)
     newFile.close()
 fin.close()
 
 # Função intercala
 def intercalate(fileA, fileB, newFile):
     contentA = fileA.read(lineStruct.size)
-    addressA = lineStruct.unpack(bytes(contentA, encoding="latin-1"))
+    addressA = lineStruct.unpack(contentA)
 
     contentB = fileB.read(lineStruct.size)
-    addressB = lineStruct.unpack(bytes(contentB, encoding="latin-1"))
+    addressB = lineStruct.unpack(contentB)
 
-    while contentA != "" and contentB != "":
+    while len(contentA) != 0 and len(contentB) != 0:
         if addressA[cepColumn] < addressB[cepColumn]:
             newFile.write(contentA)
             contentA = fileA.read(lineStruct.size)
-            if contentA != "":
-                addressA = lineStruct.unpack(bytes(contentA, encoding="latin-1"))
+            if len(contentA) == lineStruct.size:
+                addressA = lineStruct.unpack(contentA)
         else:
             newFile.write(contentB)
             contentB = fileB.read(lineStruct.size)
-            if contentB != "":
-                addressB = lineStruct.unpack(bytes(contentB, encoding="latin-1"))
+            if len(contentB) == lineStruct.size:
+                addressB = lineStruct.unpack(contentB)
 
-    while contentA != "":
+    while len(contentA) != 0:
         newFile.write(contentA)
         contentA = fileA.read(lineStruct.size)
-    while contentB != "":
+    while len(contentB) != 0:
         newFile.write(contentB)
         contentB = fileB.read(lineStruct.size)
 
@@ -78,9 +83,9 @@ while fileQuantity > 1:
         newFileName = str(newGroupCreationOrder) + "_cep_" + str(fileQuantity) + ".dat"
         print("Intercalando os arquivos: '" + fileNameA + "' e '" + fileNameB + "'.")
 
-        fileA = open(directoryName + fileNameA, "r", encoding='latin-1')
-        fileB = open(directoryName + fileNameB, "r", encoding='latin-1')
-        newFile = open(directoryName + newFileName, "w+", encoding='latin-1')
+        fileA = open(directoryName + fileNameA, "rb")
+        fileB = open(directoryName + fileNameB, "rb")
+        newFile = open(directoryName + newFileName, "wb+")
         fileQuantity += 1
 
         intercalate(fileA, fileB, newFile)
